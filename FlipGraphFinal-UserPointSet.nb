@@ -1,0 +1,1184 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Wolfram 14.2' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       154,          7]
+NotebookDataLength[     55857,       1176]
+NotebookOptionsPosition[     54646,       1146]
+NotebookOutlinePosition[     55086,       1163]
+CellTagsIndexPosition[     55043,       1160]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", " ", 
+   RowBox[{"Load", " ", "package"}], " ", "*)"}], "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"Needs", "[", "\"\<TriangleLink`\>\"", "]"}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", " ", 
+    RowBox[{"Construct", " ", "delaunay", " ", "triangulation"}], " ", "*)"}],
+    "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"delTri", "=", 
+     RowBox[{"Sort", "[", 
+      RowBox[{
+       RowBox[{"TriangleDelaunay", "[", "pts", "]"}], "[", 
+       RowBox[{"[", "2", "]"}], "]"}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{"(*", " ", 
+    RowBox[{"Set", " ", "up", " ", "flip", " ", "graph", " ", "variables"}], 
+    " ", "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"triangulations", "=", 
+     RowBox[{"{", "delTri", "}"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"sortedTriangulations", "=", 
+     RowBox[{"{", 
+      RowBox[{"Sort", "[", 
+       RowBox[{"Sort", "/@", "delTri"}], "]"}], "}"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"edges", "=", 
+     RowBox[{"{", "}"}]}], ";"}], "\[IndentingNewLine]", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", " ", 
+    RowBox[{
+    "Queue", " ", "tracks", " ", "triangulations", " ", "that", " ", "still", 
+     " ", "need", " ", "to", " ", "be", " ", "explored"}], " ", "*)"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", " ", 
+    RowBox[{
+    "Start", " ", "with", " ", "just", " ", "the", " ", "Delaunay", " ", 
+     "triangulation"}], " ", "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"queue", "=", 
+     RowBox[{"{", "1", "}"}]}], ";"}], "\[IndentingNewLine]", "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"While", "[", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"Length", "[", "queue", "]"}], ">", "0"}], ",", 
+      "\[IndentingNewLine]", 
+      RowBox[{"(*", " ", 
+       RowBox[{
+       "Pop", " ", "the", " ", "queue", " ", "by", " ", "removing", " ", 
+        "and", " ", "saving", " ", "the", " ", "first", " ", "element"}], " ",
+        "*)"}], "\[IndentingNewLine]", 
+      RowBox[{
+       RowBox[{"currIndex", "=", 
+        RowBox[{"First", "[", "queue", "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"currTriangulation", "=", 
+        RowBox[{"triangulations", "[", 
+         RowBox[{"[", "currIndex", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"queue", "=", 
+        RowBox[{"Rest", "[", "queue", "]"}]}], ";", "\[IndentingNewLine]", 
+       "\[IndentingNewLine]", 
+       RowBox[{"(*", " ", 
+        RowBox[{
+        "Find", " ", "the", " ", "convex", " ", "quadrilaterals", " ", "of", " ",
+          "the", " ", "current", " ", "triangulation"}], " ", "*)"}], 
+       "\[IndentingNewLine]", "\[IndentingNewLine]", 
+       RowBox[{"(*", " ", 
+        RowBox[{
+        "Loop", " ", "through", " ", "each", " ", "triangle", " ", "T1", " ", 
+         "except", " ", "for", " ", "the", " ", "last"}], " ", "*)"}], 
+       "\[IndentingNewLine]", 
+       RowBox[{"For", "[", 
+        RowBox[{
+         RowBox[{"i", "=", "1"}], ",", 
+         RowBox[{"i", "<", 
+          RowBox[{"Length", "[", "currTriangulation", "]"}]}], ",", 
+         RowBox[{"++", "i"}], ",", "\[IndentingNewLine]", 
+         RowBox[{"(*", " ", 
+          RowBox[{
+          "Loop", " ", "through", " ", "each", " ", "triangle", " ", "T2", " ",
+            "that", " ", "comes", " ", "after", " ", "T1"}], " ", "*)"}], 
+         "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"For", "[", 
+           RowBox[{
+            RowBox[{"j", "=", 
+             RowBox[{"i", "+", "1"}]}], ",", 
+            RowBox[{"j", "<=", 
+             RowBox[{"Length", "[", "currTriangulation", "]"}]}], ",", 
+            RowBox[{"++", "j"}], ",", "\[IndentingNewLine]", 
+            RowBox[{"(*", " ", 
+             RowBox[{
+             "Get", " ", "the", " ", "union", " ", "of", " ", "the", " ", 
+              "points", " ", "that", " ", "describe", " ", "T1", " ", "and", " ",
+               "T2"}], " ", "*)"}], "\[IndentingNewLine]", 
+            RowBox[{
+             RowBox[{"comb", "=", 
+              RowBox[{"Union", "@@", 
+               RowBox[{"currTriangulation", "[", 
+                RowBox[{"[", 
+                 RowBox[{"{", 
+                  RowBox[{"i", ",", "j"}], "}"}], "]"}], "]"}]}]}], ";", 
+             "\[IndentingNewLine]", "\[IndentingNewLine]", 
+             RowBox[{"(*", " ", 
+              RowBox[{
+               RowBox[{
+               "If", " ", "the", " ", "union", " ", "has", " ", "4", " ", 
+                "points"}], ",", " ", 
+               RowBox[{
+               "then", " ", "T1", " ", "and", " ", "T2", " ", "share", " ", 
+                "an", " ", "edge", " ", "and", " ", "their", " ", "union", " ",
+                 "forms", " ", "a", " ", "quadrilateral"}]}], " ", "*)"}], 
+             "\[IndentingNewLine]", 
+             RowBox[{"If", "[", 
+              RowBox[{
+               RowBox[{
+                RowBox[{"Length", "[", "comb", "]"}], "==", "4"}], ",", 
+               "\[IndentingNewLine]", 
+               RowBox[{"(*", " ", 
+                RowBox[{
+                 RowBox[{
+                 "Find", " ", "the", " ", "index", " ", "of", " ", "the", " ",
+                   "point", " ", "in", " ", "the", " ", "union", " ", "that", 
+                  " ", "has", " ", "the", " ", "lowest", " ", "y"}], "-", 
+                 RowBox[{"value", " ", 
+                  RowBox[{"(", 
+                   RowBox[{
+                    RowBox[{"right", " ", "x"}], "-", 
+                    RowBox[{"value", " ", "in", " ", "ties"}]}], ")"}]}], " ",
+                  "-", " ", 
+                 RowBox[{
+                 "which", " ", "becomes", " ", "the", " ", "anchor", " ", 
+                  "point"}]}], " ", "*)"}], "\[IndentingNewLine]", 
+               RowBox[{
+                RowBox[{"minIndex", "=", 
+                 RowBox[{
+                  RowBox[{"Sort", "[", 
+                   RowBox[{
+                    RowBox[{"MinimalBy", "[", 
+                    RowBox[{
+                    RowBox[{"{", 
+                    RowBox[{"1", ",", "2", ",", "3", ",", "4"}], "}"}], ",", 
+                    RowBox[{
+                    RowBox[{"pts", "[", 
+                    RowBox[{"[", 
+                    RowBox[{
+                    RowBox[{"comb", "[", 
+                    RowBox[{"[", "#", "]"}], "]"}], ",", "2"}], "]"}], "]"}], 
+                    "&"}]}], "]"}], ",", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"#1", "[", 
+                    RowBox[{"[", "1", "]"}], "]"}], ">", 
+                    RowBox[{"#2", "[", 
+                    RowBox[{"[", "1", "]"}], "]"}]}], "&"}]}], "]"}], "[", 
+                  RowBox[{"[", "1", "]"}], "]"}]}], ";", 
+                "\[IndentingNewLine]", "\[IndentingNewLine]", 
+                RowBox[{"(*", " ", 
+                 RowBox[{
+                 "Swap", " ", "the", " ", "first", " ", "point", " ", "and", " ",
+                   "the", " ", "anchor", " ", "point"}], " ", "*)"}], 
+                "\[IndentingNewLine]", 
+                RowBox[{
+                 RowBox[{"comb", "[", 
+                  RowBox[{"[", 
+                   RowBox[{"{", 
+                    RowBox[{"1", ",", "minIndex"}], "}"}], "]"}], "]"}], "=", 
+                 RowBox[{"comb", "[", 
+                  RowBox[{"[", 
+                   RowBox[{"{", 
+                    RowBox[{"minIndex", ",", "1"}], "}"}], "]"}], "]"}]}], ";",
+                 "\[IndentingNewLine]", 
+                RowBox[{"(*", " ", 
+                 RowBox[{
+                  RowBox[{
+                  "Sort", " ", "the", " ", "other", " ", "three", " ", 
+                   "points", " ", "by", " ", "their", " ", "angle", " ", "to",
+                    " ", "the", " ", "anchor", " ", "point", " ", "from", " ",
+                    "the", " ", "right", " ", "horizontal"}], ",", " ", 
+                  RowBox[{"in", " ", "descending", " ", "order"}]}], " ", 
+                 "*)"}], "\[IndentingNewLine]", 
+                RowBox[{
+                 RowBox[{"comb", "[", 
+                  RowBox[{"[", 
+                   RowBox[{"2", ";;"}], "]"}], "]"}], "=", 
+                 RowBox[{"Sort", "[", 
+                  RowBox[{
+                   RowBox[{"comb", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"2", ";;"}], "]"}], "]"}], ",", 
+                   RowBox[{
+                    RowBox[{"PositivelyOrientedPoints", "[", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"pts", "[", 
+                    RowBox[{"[", "#1", "]"}], "]"}], ",", 
+                    RowBox[{"pts", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"comb", "[", 
+                    RowBox[{"[", "1", "]"}], "]"}], "]"}], "]"}], ",", 
+                    RowBox[{"pts", "[", 
+                    RowBox[{"[", "#2", "]"}], "]"}]}], "}"}], "]"}], "&"}]}], 
+                  "]"}]}], ";", "\[IndentingNewLine]", "\[IndentingNewLine]", 
+                RowBox[{"(*", " ", 
+                 RowBox[{
+                 "Check", " ", "if", " ", "the", " ", "quadrilateral", " ", 
+                  "is", " ", "convex"}], " ", "*)"}], "\[IndentingNewLine]", 
+                RowBox[{"If", "[", 
+                 RowBox[{
+                  RowBox[{"ConvexRegionQ", "[", 
+                   RowBox[{"MeshRegion", "[", 
+                    RowBox[{"pts", ",", 
+                    RowBox[{"Polygon", "[", "comb", "]"}]}], "]"}], "]"}], ",",
+                   "\[IndentingNewLine]", 
+                  RowBox[{
+                   RowBox[{"newTriangulation", "=", "currTriangulation"}], ";",
+                    "\[IndentingNewLine]", "\[IndentingNewLine]", 
+                   RowBox[{"(*", " ", 
+                    RowBox[{
+                    "Find", " ", "the", " ", "two", " ", "shared", " ", 
+                    "points", " ", "of", " ", "the", " ", "two", " ", 
+                    "triangles"}], " ", "*)"}], "\[IndentingNewLine]", 
+                   RowBox[{"shared", "=", 
+                    RowBox[{"Intersection", "@@", 
+                    RowBox[{"currTriangulation", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"{", 
+                    RowBox[{"i", ",", "j"}], "}"}], "]"}], "]"}]}]}], ";", 
+                   "\[IndentingNewLine]", 
+                   RowBox[{"(*", " ", 
+                    RowBox[{
+                    "Find", " ", "the", " ", "two", " ", "unshared", " ", 
+                    "points", " ", "of", " ", "the", " ", "two", " ", 
+                    "triangles"}], " ", "*)"}], "\[IndentingNewLine]", 
+                   RowBox[{"unshared", "=", 
+                    RowBox[{"SymmetricDifference", "@@", 
+                    RowBox[{"currTriangulation", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"{", 
+                    RowBox[{"i", ",", "j"}], "}"}], "]"}], "]"}]}]}], ";", 
+                   "\[IndentingNewLine]", "\[IndentingNewLine]", 
+                   RowBox[{"(*", " ", 
+                    RowBox[{
+                    "Create", " ", "a", " ", "new", " ", "triangle", " ", 
+                    "consisting", " ", "of", " ", "the", " ", "unshared", " ",
+                     "points", " ", "plus", " ", "one", " ", "of", " ", "the",
+                     " ", "shared"}], " ", "*)"}], "\[IndentingNewLine]", 
+                   RowBox[{"newT1", "=", 
+                    RowBox[{"Append", "[", 
+                    RowBox[{"unshared", ",", 
+                    RowBox[{"shared", "[", 
+                    RowBox[{"[", "1", "]"}], "]"}]}], "]"}]}], ";", 
+                   "\[IndentingNewLine]", 
+                   RowBox[{"(*", " ", 
+                    RowBox[{
+                    "Rearrange", " ", "the", " ", "order", " ", "of", " ", 
+                    "the", " ", "points", " ", "so", " ", "that", " ", "the", 
+                    " ", "triangle", " ", "is", " ", "described", " ", "in", " ",
+                     "counter", " ", "clockwise", " ", "order"}], " ", "*)"}],
+                    "\[IndentingNewLine]", 
+                   RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{"PositivelyOrientedPoints", "[", "newT1", "]"}], ",", 
+                    RowBox[{"newT1", "=", 
+                    RowBox[{"Reverse", "[", "newT1", "]"}]}]}], "]"}], ";", 
+                   "\[IndentingNewLine]", "\[IndentingNewLine]", 
+                   RowBox[{"(*", " ", 
+                    RowBox[{
+                    "Repeat", " ", "for", " ", "the", " ", "other", " ", 
+                    "shared", " ", "point"}], " ", "*)"}], 
+                   "\[IndentingNewLine]", 
+                   RowBox[{"newT2", "=", 
+                    RowBox[{"Append", "[", 
+                    RowBox[{"unshared", ",", 
+                    RowBox[{"shared", "[", 
+                    RowBox[{"[", "2", "]"}], "]"}]}], "]"}]}], ";", 
+                   "\[IndentingNewLine]", 
+                   RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{"PositivelyOrientedPoints", "[", "newT2", "]"}], ",", 
+                    RowBox[{"newT2", "=", 
+                    RowBox[{"Reverse", "[", "newT2", "]"}]}]}], "]"}], ";", 
+                   "\[IndentingNewLine]", "\[IndentingNewLine]", 
+                   RowBox[{"(*", " ", 
+                    RowBox[{
+                    "Replace", " ", "the", " ", "triangles", " ", "of", " ", 
+                    "the", " ", "convex", " ", "quadrilateral", " ", "with", " ",
+                     "the", " ", "new", " ", "triangles", " ", "to", " ", 
+                    "reflect", " ", "the", " ", "edge", " ", "flip"}], " ", 
+                    "*)"}], "\[IndentingNewLine]", 
+                   RowBox[{
+                    RowBox[{"newTriangulation", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"{", 
+                    RowBox[{"i", ",", "j"}], "}"}], "]"}], "]"}], "=", 
+                    RowBox[{"{", 
+                    RowBox[{"newT1", ",", "newT2"}], "}"}]}], ";", 
+                   "\[IndentingNewLine]", 
+                   RowBox[{"sortedNewTriangulation", "=", 
+                    RowBox[{"Sort", "[", 
+                    RowBox[{"Sort", "/@", "newTriangulation"}], "]"}]}], ";", 
+                   "\[IndentingNewLine]", "\[IndentingNewLine]", 
+                   RowBox[{"(*", " ", 
+                    RowBox[{
+                    "Verify", " ", "if", " ", "the", " ", "new", " ", 
+                    "triangulation", " ", "is", " ", "new", " ", "globally"}],
+                     " ", "*)"}], "\[IndentingNewLine]", 
+                   RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{"!", 
+                    RowBox[{"MemberQ", "[", 
+                    RowBox[{
+                    "sortedTriangulations", ",", "sortedNewTriangulation"}], 
+                    "]"}]}], ",", "\[IndentingNewLine]", 
+                    RowBox[{"(*", " ", 
+                    RowBox[{
+                    RowBox[{"Triangulation", " ", "is", " ", "new"}], ",", 
+                    " ", 
+                    RowBox[{"add", " ", "it"}]}], " ", "*)"}], 
+                    "\[IndentingNewLine]", 
+                    RowBox[{
+                    RowBox[{"triangulations", "=", 
+                    RowBox[{"Append", "[", 
+                    RowBox[{"triangulations", ",", "newTriangulation"}], 
+                    "]"}]}], ";", "\[IndentingNewLine]", 
+                    RowBox[{"sortedTriangulations", "=", 
+                    RowBox[{"Append", "[", 
+                    RowBox[{
+                    "sortedTriangulations", ",", "sortedNewTriangulation"}], 
+                    "]"}]}], ";", "\[IndentingNewLine]", 
+                    "\[IndentingNewLine]", 
+                    RowBox[{"(*", " ", 
+                    RowBox[{
+                    "Record", " ", "connection", " ", "between", " ", "the", " ",
+                     "current", " ", "and", " ", "the", " ", "new", " ", 
+                    "triangulation"}], " ", "*)"}], "\[IndentingNewLine]", 
+                    RowBox[{"newIndex", "=", 
+                    RowBox[{"Length", "[", "triangulations", "]"}]}], ";", 
+                    "\[IndentingNewLine]", 
+                    RowBox[{"edges", "=", 
+                    RowBox[{"Append", "[", 
+                    RowBox[{"edges", ",", 
+                    RowBox[{"{", 
+                    RowBox[{"currIndex", ",", "newIndex"}], "}"}]}], "]"}]}], 
+                    ";", "\[IndentingNewLine]", "\[IndentingNewLine]", 
+                    RowBox[{"(*", " ", 
+                    RowBox[{
+                    "Push", " ", "index", " ", "of", " ", "new", " ", 
+                    "triangulation", " ", "to", " ", "the", " ", "queue"}], 
+                    " ", "*)"}], "\[IndentingNewLine]", 
+                    RowBox[{"queue", "=", 
+                    RowBox[{"Append", "[", 
+                    RowBox[{"queue", ",", "newIndex"}], "]"}]}]}], ",", 
+                    "\[IndentingNewLine]", "\[IndentingNewLine]", 
+                    RowBox[{"(*", " ", 
+                    RowBox[{
+                    RowBox[{
+                    "Trianglation", " ", "is", " ", "not", " ", "new"}], ",", 
+                    " ", 
+                    RowBox[{
+                    "check", " ", "for", " ", "edge", " ", "and", " ", "add", 
+                    " ", "it", " ", "if", " ", "not", " ", "yet", " ", 
+                    "included"}]}], " ", "*)"}], "\[IndentingNewLine]", 
+                    RowBox[{
+                    RowBox[{"newIndex", "=", 
+                    RowBox[{
+                    RowBox[{"Position", "[", 
+                    RowBox[{
+                    "sortedTriangulations", ",", "sortedNewTriangulation"}], 
+                    "]"}], "[", 
+                    RowBox[{"[", 
+                    RowBox[{"1", ",", "1"}], "]"}], "]"}]}], ";", 
+                    "\[IndentingNewLine]", 
+                    RowBox[{"newEdge", "=", 
+                    RowBox[{"Sort", "[", 
+                    RowBox[{"{", 
+                    RowBox[{"currIndex", ",", "newIndex"}], "}"}], "]"}]}], ";",
+                     "\[IndentingNewLine]", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{"!", 
+                    RowBox[{"MemberQ", "[", 
+                    RowBox[{"edges", ",", "newEdge"}], "]"}]}], ",", 
+                    RowBox[{"edges", "=", 
+                    RowBox[{"Append", "[", 
+                    RowBox[{"edges", ",", "newEdge"}], "]"}]}]}], "]"}]}]}], 
+                    "\[IndentingNewLine]", "]"}], ";"}]}], 
+                 "\[IndentingNewLine]", "]"}], ";"}]}], "\[IndentingNewLine]",
+               "]"}], ";"}]}], "\[IndentingNewLine]", "]"}], ";"}]}], 
+        "\[IndentingNewLine]", "]"}], ";"}]}], "\[IndentingNewLine]", "]"}], 
+    ";"}], "\[IndentingNewLine]", "\[IndentingNewLine]", 
+   RowBox[{"(*", " ", 
+    RowBox[{
+    "Generate", " ", "mesh", " ", "regions", " ", "from", " ", "each", " ", 
+     "triangulation", " ", "of", " ", "the", " ", "flip", " ", "graph", " ", 
+     "to", " ", "use", " ", "as", " ", "vertices"}], " ", "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"vertexShapes", "=", 
+     RowBox[{"{", "}"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"For", "[", 
+     RowBox[{
+      RowBox[{"i", "=", "1"}], ",", 
+      RowBox[{"i", "<=", 
+       RowBox[{"Length", "[", "triangulations", "]"}]}], ",", 
+      RowBox[{"++", "i"}], ",", "\[IndentingNewLine]", 
+      RowBox[{
+       RowBox[{"vertexShapes", "=", 
+        RowBox[{"Append", "[", 
+         RowBox[{"vertexShapes", ",", 
+          RowBox[{"i", "->", 
+           RowBox[{"MeshRegion", "[", 
+            RowBox[{"pts", ",", 
+             RowBox[{"Polygon", "[", 
+              RowBox[{"triangulations", "[", 
+               RowBox[{"[", "i", "]"}], "]"}], "]"}]}], "]"}]}]}], "]"}]}], 
+       ";"}]}], "\[IndentingNewLine]", "]"}], ";"}], "\[IndentingNewLine]", 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", " ", 
+    RowBox[{
+    "Construct", " ", "the", " ", "flip", " ", "graph", " ", 
+     "visualization"}], " ", "*)"}], "\[IndentingNewLine]", 
+   RowBox[{"Graph", "[", 
+    RowBox[{"edges", ",", 
+     RowBox[{"VertexShape", "->", "vertexShapes"}], ",", 
+     RowBox[{"VertexSize", "->", "Large"}], ",", 
+     RowBox[{"ImageSize", "->", "Large"}]}], "]"}]}]}]], "Input",
+ CellChangeTimes->{{3.948545874116535*^9, 3.948545874535721*^9}, {
+   3.948546434748684*^9, 3.9485464439452934`*^9}, {3.948548204778303*^9, 
+   3.9485482086673317`*^9}, 3.948548676600853*^9},
+ CellLabel->
+  "In[139]:=",ExpressionUUID->"faf433c9-dc3a-8444-a2e7-ba24b2a31b3f"],
+
+Cell[BoxData[
+ GraphicsBox[
+  NamespaceBox["NetworkGraphics",
+   DynamicModuleBox[{Typeset`graph = HoldComplete[
+     Graph[{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}, {
+      Null, {{1, 2}, {1, 3}, {1, 4}, {2, 5}, {2, 6}, {3, 7}, {3, 8}, {4, 9}, {
+       4, 10}, {5, 11}, {5, 9}, {6, 7}, {6, 11}, {7, 12}, {8, 12}, {8, 10}, {
+       9, 13}, {10, 13}, {11, 14}, {12, 14}, {13, 14}}}, {
+      ImageSize -> Large, 
+       VertexShape -> {
+        6 -> MeshRegion[{{2.060410226387429, 4.8526541529002625`}, {6.18, 
+           7.0600000000000005`}, {3.0500000000000003`, 2.54}, {5.64, 1.76}, {
+           7.48, 4.16}, {3.7, 7.0600000000000005`}}, {
+            Polygon[{{3, 5, 1}, {5, 2, 1}, {5, 3, 4}, {1, 2, 6}}]}, 
+           Method -> {
+            "EliminateUnusedCoordinates" -> True, 
+             "DeleteDuplicateCoordinates" -> Automatic, 
+             "DeleteDuplicateCells" -> Automatic, "VertexAlias" -> Identity, 
+             "CheckOrientation" -> Automatic, "CoplanarityTolerance" -> 
+             Automatic, "CheckIntersections" -> Automatic, "BoundaryNesting" -> 
+             Automatic, "SeparateBoundaries" -> Automatic, "TJunction" -> 
+             Automatic, "PropagateMarkers" -> True, "ZeroTest" -> Automatic, 
+             "Hash" -> 4088626621867037804}], 14 -> 
+         MeshRegion[{{2.060410226387429, 4.8526541529002625`}, {6.18, 
+           7.0600000000000005`}, {3.0500000000000003`, 2.54}, {5.64, 1.76}, {
+           7.48, 4.16}, {3.7, 7.0600000000000005`}}, {
+            Polygon[{{3, 4, 1}, {1, 4, 2}, {2, 4, 5}, {1, 2, 6}}]}, 
+           Method -> {
+            "EliminateUnusedCoordinates" -> True, 
+             "DeleteDuplicateCoordinates" -> Automatic, 
+             "DeleteDuplicateCells" -> Automatic, "VertexAlias" -> Identity, 
+             "CheckOrientation" -> Automatic, "CoplanarityTolerance" -> 
+             Automatic, "CheckIntersections" -> Automatic, "BoundaryNesting" -> 
+             Automatic, "SeparateBoundaries" -> Automatic, "TJunction" -> 
+             Automatic, "PropagateMarkers" -> True, "ZeroTest" -> Automatic, 
+             "Hash" -> 6362723824095139067}], 8 -> 
+         MeshRegion[{{2.060410226387429, 4.8526541529002625`}, {6.18, 
+           7.0600000000000005`}, {3.0500000000000003`, 2.54}, {5.64, 1.76}, {
+           7.48, 4.16}, {3.7, 7.0600000000000005`}}, {
+            Polygon[{{1, 3, 6}, {3, 4, 2}, {2, 4, 5}, {6, 3, 2}}]}, 
+           Method -> {
+            "EliminateUnusedCoordinates" -> True, 
+             "DeleteDuplicateCoordinates" -> Automatic, 
+             "DeleteDuplicateCells" -> Automatic, "VertexAlias" -> Identity, 
+             "CheckOrientation" -> Automatic, "CoplanarityTolerance" -> 
+             Automatic, "CheckIntersections" -> Automatic, "BoundaryNesting" -> 
+             Automatic, "SeparateBoundaries" -> Automatic, "TJunction" -> 
+             Automatic, "PropagateMarkers" -> True, "ZeroTest" -> Automatic, 
+             "Hash" -> 5048405207928554118}], 9 -> 
+         MeshRegion[{{2.060410226387429, 4.8526541529002625`}, {6.18, 
+           7.0600000000000005`}, {3.0500000000000003`, 2.54}, {5.64, 1.76}, {
+           7.48, 4.16}, {3.7, 7.0600000000000005`}}, {
+            Polygon[{{3, 4, 1}, {5, 2, 6}, {1, 4, 6}, {5, 6, 4}}]}, 
+           Method -> {
+            "EliminateUnusedCoordinates" -> True, 
+             "DeleteDuplicateCoordinates" -> Automatic, 
+             "DeleteDuplicateCells" -> Automatic, "VertexAlias" -> Identity, 
+             "CheckOrientation" -> Automatic, "CoplanarityTolerance" -> 
+             Automatic, "CheckIntersections" -> Automatic, "BoundaryNesting" -> 
+             Automatic, "SeparateBoundaries" -> Automatic, "TJunction" -> 
+             Automatic, "PropagateMarkers" -> True, "ZeroTest" -> Automatic, 
+             "Hash" -> 8692437747243001405}], 2 -> 
+         MeshRegion[{{2.060410226387429, 4.8526541529002625`}, {6.18, 
+           7.0600000000000005`}, {3.0500000000000003`, 2.54}, {5.64, 1.76}, {
+           7.48, 4.16}, {3.7, 7.0600000000000005`}}, {
+            Polygon[{{3, 5, 1}, {5, 2, 6}, {5, 3, 4}, {1, 5, 6}}]}, 
+           Method -> {
+            "EliminateUnusedCoordinates" -> True, 
+             "DeleteDuplicateCoordinates" -> Automatic, 
+             "DeleteDuplicateCells" -> Automatic, "VertexAlias" -> Identity, 
+             "CheckOrientation" -> Automatic, "CoplanarityTolerance" -> 
+             Automatic, "CheckIntersections" -> Automatic, "BoundaryNesting" -> 
+             Automatic, "SeparateBoundaries" -> Automatic, "TJunction" -> 
+             Automatic, "PropagateMarkers" -> True, "ZeroTest" -> Automatic, 
+             "Hash" -> 7498248029859866217}], 13 -> 
+         MeshRegion[{{2.060410226387429, 4.8526541529002625`}, {6.18, 
+           7.0600000000000005`}, {3.0500000000000003`, 2.54}, {5.64, 1.76}, {
+           7.48, 4.16}, {3.7, 7.0600000000000005`}}, {
+            Polygon[{{3, 4, 1}, {2, 4, 5}, {1, 4, 6}, {6, 4, 2}}]}, 
+           Method -> {
+            "EliminateUnusedCoordinates" -> True, 
+             "DeleteDuplicateCoordinates" -> Automatic, 
+             "DeleteDuplicateCells" -> Automatic, "VertexAlias" -> Identity, 
+             "CheckOrientation" -> Automatic, "CoplanarityTolerance" -> 
+             Automatic, "CheckIntersections" -> Automatic, "BoundaryNesting" -> 
+             Automatic, "SeparateBoundaries" -> Automatic, "TJunction" -> 
+             Automatic, "PropagateMarkers" -> True, "ZeroTest" -> Automatic, 
+             "Hash" -> 5534731726303030557}], 12 -> 
+         MeshRegion[{{2.060410226387429, 4.8526541529002625`}, {6.18, 
+           7.0600000000000005`}, {3.0500000000000003`, 2.54}, {5.64, 1.76}, {
+           7.48, 4.16}, {3.7, 7.0600000000000005`}}, {
+            Polygon[{{3, 2, 1}, {3, 4, 2}, {2, 4, 5}, {1, 2, 6}}]}, 
+           Method -> {
+            "EliminateUnusedCoordinates" -> True, 
+             "DeleteDuplicateCoordinates" -> Automatic, 
+             "DeleteDuplicateCells" -> Automatic, "VertexAlias" -> Identity, 
+             "CheckOrientation" -> Automatic, "CoplanarityTolerance" -> 
+             Automatic, "CheckIntersections" -> Automatic, "BoundaryNesting" -> 
+             Automatic, "SeparateBoundaries" -> Automatic, "TJunction" -> 
+             Automatic, "PropagateMarkers" -> True, "ZeroTest" -> Automatic, 
+             "Hash" -> 5284997156975755326}], 11 -> 
+         MeshRegion[{{2.060410226387429, 4.8526541529002625`}, {6.18, 
+           7.0600000000000005`}, {3.0500000000000003`, 2.54}, {5.64, 1.76}, {
+           7.48, 4.16}, {3.7, 7.0600000000000005`}}, {
+            Polygon[{{3, 4, 1}, {5, 2, 1}, {1, 4, 5}, {1, 2, 6}}]}, 
+           Method -> {
+            "EliminateUnusedCoordinates" -> True, 
+             "DeleteDuplicateCoordinates" -> Automatic, 
+             "DeleteDuplicateCells" -> Automatic, "VertexAlias" -> Identity, 
+             "CheckOrientation" -> Automatic, "CoplanarityTolerance" -> 
+             Automatic, "CheckIntersections" -> Automatic, "BoundaryNesting" -> 
+             Automatic, "SeparateBoundaries" -> Automatic, "TJunction" -> 
+             Automatic, "PropagateMarkers" -> True, "ZeroTest" -> Automatic, 
+             "Hash" -> 7929279757752455094}], 5 -> 
+         MeshRegion[{{2.060410226387429, 4.8526541529002625`}, {6.18, 
+           7.0600000000000005`}, {3.0500000000000003`, 2.54}, {5.64, 1.76}, {
+           7.48, 4.16}, {3.7, 7.0600000000000005`}}, {
+            Polygon[{{3, 4, 1}, {5, 2, 6}, {1, 4, 5}, {1, 5, 6}}]}, 
+           Method -> {
+            "EliminateUnusedCoordinates" -> True, 
+             "DeleteDuplicateCoordinates" -> Automatic, 
+             "DeleteDuplicateCells" -> Automatic, "VertexAlias" -> Identity, 
+             "CheckOrientation" -> Automatic, "CoplanarityTolerance" -> 
+             Automatic, "CheckIntersections" -> Automatic, "BoundaryNesting" -> 
+             Automatic, "SeparateBoundaries" -> Automatic, "TJunction" -> 
+             Automatic, "PropagateMarkers" -> True, "ZeroTest" -> Automatic, 
+             "Hash" -> 5192945034359259383}], 10 -> 
+         MeshRegion[{{2.060410226387429, 4.8526541529002625`}, {6.18, 
+           7.0600000000000005`}, {3.0500000000000003`, 2.54}, {5.64, 1.76}, {
+           7.48, 4.16}, {3.7, 7.0600000000000005`}}, {
+            Polygon[{{1, 3, 6}, {2, 4, 5}, {4, 6, 3}, {6, 4, 2}}]}, 
+           Method -> {
+            "EliminateUnusedCoordinates" -> True, 
+             "DeleteDuplicateCoordinates" -> Automatic, 
+             "DeleteDuplicateCells" -> Automatic, "VertexAlias" -> Identity, 
+             "CheckOrientation" -> Automatic, "CoplanarityTolerance" -> 
+             Automatic, "CheckIntersections" -> Automatic, "BoundaryNesting" -> 
+             Automatic, "SeparateBoundaries" -> Automatic, "TJunction" -> 
+             Automatic, "PropagateMarkers" -> True, "ZeroTest" -> Automatic, 
+             "Hash" -> 996509213819360284}], 3 -> 
+         MeshRegion[{{2.060410226387429, 4.8526541529002625`}, {6.18, 
+           7.0600000000000005`}, {3.0500000000000003`, 2.54}, {5.64, 1.76}, {
+           7.48, 4.16}, {3.7, 7.0600000000000005`}}, {
+            Polygon[{{1, 3, 6}, {2, 3, 5}, {5, 3, 4}, {6, 3, 2}}]}, 
+           Method -> {
+            "EliminateUnusedCoordinates" -> True, 
+             "DeleteDuplicateCoordinates" -> Automatic, 
+             "DeleteDuplicateCells" -> Automatic, "VertexAlias" -> Identity, 
+             "CheckOrientation" -> Automatic, "CoplanarityTolerance" -> 
+             Automatic, "CheckIntersections" -> Automatic, "BoundaryNesting" -> 
+             Automatic, "SeparateBoundaries" -> Automatic, "TJunction" -> 
+             Automatic, "PropagateMarkers" -> True, "ZeroTest" -> Automatic, 
+             "Hash" -> 1549280565656667892}], 7 -> 
+         MeshRegion[{{2.060410226387429, 4.8526541529002625`}, {6.18, 
+           7.0600000000000005`}, {3.0500000000000003`, 2.54}, {5.64, 1.76}, {
+           7.48, 4.16}, {3.7, 7.0600000000000005`}}, {
+            Polygon[{{3, 2, 1}, {2, 3, 5}, {5, 3, 4}, {1, 2, 6}}]}, 
+           Method -> {
+            "EliminateUnusedCoordinates" -> True, 
+             "DeleteDuplicateCoordinates" -> Automatic, 
+             "DeleteDuplicateCells" -> Automatic, "VertexAlias" -> Identity, 
+             "CheckOrientation" -> Automatic, "CoplanarityTolerance" -> 
+             Automatic, "CheckIntersections" -> Automatic, "BoundaryNesting" -> 
+             Automatic, "SeparateBoundaries" -> Automatic, "TJunction" -> 
+             Automatic, "PropagateMarkers" -> True, "ZeroTest" -> Automatic, 
+             "Hash" -> 4410112892516101242}], 1 -> 
+         MeshRegion[{{2.060410226387429, 4.8526541529002625`}, {6.18, 
+           7.0600000000000005`}, {3.0500000000000003`, 2.54}, {5.64, 1.76}, {
+           7.48, 4.16}, {3.7, 7.0600000000000005`}}, {
+            Polygon[{{1, 3, 6}, {5, 2, 6}, {5, 3, 4}, {6, 3, 5}}]}, 
+           Method -> {
+            "EliminateUnusedCoordinates" -> True, 
+             "DeleteDuplicateCoordinates" -> Automatic, 
+             "DeleteDuplicateCells" -> Automatic, "VertexAlias" -> Identity, 
+             "CheckOrientation" -> Automatic, "CoplanarityTolerance" -> 
+             Automatic, "CheckIntersections" -> Automatic, "BoundaryNesting" -> 
+             Automatic, "SeparateBoundaries" -> Automatic, "TJunction" -> 
+             Automatic, "PropagateMarkers" -> True, "ZeroTest" -> Automatic, 
+             "Hash" -> 4440505452155305880}], 4 -> 
+         MeshRegion[{{2.060410226387429, 4.8526541529002625`}, {6.18, 
+           7.0600000000000005`}, {3.0500000000000003`, 2.54}, {5.64, 1.76}, {
+           7.48, 4.16}, {3.7, 7.0600000000000005`}}, {
+            Polygon[{{1, 3, 6}, {5, 2, 6}, {4, 6, 3}, {5, 6, 4}}]}, 
+           Method -> {
+            "EliminateUnusedCoordinates" -> True, 
+             "DeleteDuplicateCoordinates" -> Automatic, 
+             "DeleteDuplicateCells" -> Automatic, "VertexAlias" -> Identity, 
+             "CheckOrientation" -> Automatic, "CoplanarityTolerance" -> 
+             Automatic, "CheckIntersections" -> Automatic, "BoundaryNesting" -> 
+             Automatic, "SeparateBoundaries" -> Automatic, "TJunction" -> 
+             Automatic, "PropagateMarkers" -> True, "ZeroTest" -> Automatic, 
+             "Hash" -> 986014958129611213}]}, VertexSize -> {Large}}]]}, 
+    TagBox[
+     GraphicsGroupBox[
+      GraphicsComplexBox[{{1.4952734924617344`, 0.}, {0.6282926736506533, 
+       0.046701332811646346`}, {0.8873801245261281, 0.9719163247410201}, {
+       2.5562227235906114`, 0.34598791884934244`}, {1.3707578883868037`, 
+       0.6463531460533174}, {0., 0.845611642509553}, {0.06809232102710006, 
+       1.6431093940465828`}, {1.5928057957664155`, 1.746686465090069}, {
+       2.385255184800588, 0.9648975080834914}, {2.688502778344711, 
+       1.3949477324947575`}, {0.7830650726770523, 1.5157584535665514`}, {
+       0.7506718312037932, 2.382535608405737}, {2.494312319176222, 
+       2.0215949194109566`}, {1.4870315799059182`, 2.42694034215721}}, {
+        {Hue[0.6, 0.7, 0.7], Opacity[0.7], CapForm["Round"], Arrowheads[0.], 
+         ArrowBox[{{1, 2}, {1, 3}, {1, 4}, {2, 5}, {2, 6}, {3, 7}, {3, 8}, {4,
+           9}, {4, 10}, {5, 9}, {5, 11}, {6, 7}, {6, 11}, {7, 12}, {8, 10}, {
+          8, 12}, {9, 13}, {10, 13}, {11, 14}, {12, 14}, {13, 14}}, 
+          0.10524301373611114`]}, 
+        {Hue[0.6, 0.5, 1.], EdgeForm[{GrayLevel[0], Opacity[0.7]}], InsetBox[
+          FormBox[
+           GraphicsBox[
+            TagBox[
+             DynamicModuleBox[{Typeset`mesh = {MeshRegion, {}}}, 
+              
+              TagBox[GraphicsComplexBox[{{2.060410226387429, 
+                4.8526541529002625`}, {6.18, 7.0600000000000005`}, {
+                3.0500000000000003`, 2.54}, {5.64, 1.76}, {7.48, 4.16}, {3.7, 
+                7.0600000000000005`}}, 
+                {Hue[0.6, 0.3, 0.95], EdgeForm[Hue[0.6, 0.3, 0.75]], 
+                 
+                 TagBox[PolygonBox[{{1, 3, 6}, {5, 2, 6}, {5, 3, 4}, {6, 3, 
+                   5}}],
+                  Annotation[#, "Geometry"]& ]}],
+               MouseAppearanceTag["LinkHand"]],
+              AllowKernelInitialization->False],
+             "MeshGraphics",
+             AutoDelete->True,
+             Editable->False,
+             Selectable->False],
+            
+            DefaultBaseStyle->{
+             "MeshGraphics", FrontEnd`GraphicsHighlightColor -> 
+              Hue[0.1, 1, 0.7]}],
+           TraditionalForm], 1, 
+          Automatic, {0.21048602747222228, 0.21048602747222228}], InsetBox[
+          FormBox[
+           GraphicsBox[
+            TagBox[
+             DynamicModuleBox[{Typeset`mesh = {MeshRegion, {}}}, 
+              
+              TagBox[GraphicsComplexBox[{{2.060410226387429, 
+                4.8526541529002625`}, {6.18, 7.0600000000000005`}, {
+                3.0500000000000003`, 2.54}, {5.64, 1.76}, {7.48, 4.16}, {3.7, 
+                7.0600000000000005`}}, 
+                {Hue[0.6, 0.3, 0.95], EdgeForm[Hue[0.6, 0.3, 0.75]], 
+                 
+                 TagBox[PolygonBox[{{3, 5, 1}, {5, 2, 6}, {5, 3, 4}, {1, 5, 
+                   6}}],
+                  Annotation[#, "Geometry"]& ]}],
+               MouseAppearanceTag["LinkHand"]],
+              AllowKernelInitialization->False],
+             "MeshGraphics",
+             AutoDelete->True,
+             Editable->False,
+             Selectable->False],
+            
+            DefaultBaseStyle->{
+             "MeshGraphics", FrontEnd`GraphicsHighlightColor -> 
+              Hue[0.1, 1, 0.7]}],
+           TraditionalForm], 2, 
+          Automatic, {0.21048602747222228, 0.21048602747222228}], InsetBox[
+          FormBox[
+           GraphicsBox[
+            TagBox[
+             DynamicModuleBox[{Typeset`mesh = {MeshRegion, {}}}, 
+              
+              TagBox[GraphicsComplexBox[{{2.060410226387429, 
+                4.8526541529002625`}, {6.18, 7.0600000000000005`}, {
+                3.0500000000000003`, 2.54}, {5.64, 1.76}, {7.48, 4.16}, {3.7, 
+                7.0600000000000005`}}, 
+                {Hue[0.6, 0.3, 0.95], EdgeForm[Hue[0.6, 0.3, 0.75]], 
+                 
+                 TagBox[PolygonBox[{{1, 3, 6}, {2, 3, 5}, {5, 3, 4}, {6, 3, 
+                   2}}],
+                  Annotation[#, "Geometry"]& ]}],
+               MouseAppearanceTag["LinkHand"]],
+              AllowKernelInitialization->False],
+             "MeshGraphics",
+             AutoDelete->True,
+             Editable->False,
+             Selectable->False],
+            
+            DefaultBaseStyle->{
+             "MeshGraphics", FrontEnd`GraphicsHighlightColor -> 
+              Hue[0.1, 1, 0.7]}],
+           TraditionalForm], 3, 
+          Automatic, {0.21048602747222228, 0.21048602747222228}], InsetBox[
+          FormBox[
+           GraphicsBox[
+            TagBox[
+             DynamicModuleBox[{Typeset`mesh = {MeshRegion, {}}}, 
+              
+              TagBox[GraphicsComplexBox[{{2.060410226387429, 
+                4.8526541529002625`}, {6.18, 7.0600000000000005`}, {
+                3.0500000000000003`, 2.54}, {5.64, 1.76}, {7.48, 4.16}, {3.7, 
+                7.0600000000000005`}}, 
+                {Hue[0.6, 0.3, 0.95], EdgeForm[Hue[0.6, 0.3, 0.75]], 
+                 
+                 TagBox[PolygonBox[{{1, 3, 6}, {5, 2, 6}, {4, 6, 3}, {5, 6, 
+                   4}}],
+                  Annotation[#, "Geometry"]& ]}],
+               MouseAppearanceTag["LinkHand"]],
+              AllowKernelInitialization->False],
+             "MeshGraphics",
+             AutoDelete->True,
+             Editable->False,
+             Selectable->False],
+            
+            DefaultBaseStyle->{
+             "MeshGraphics", FrontEnd`GraphicsHighlightColor -> 
+              Hue[0.1, 1, 0.7]}],
+           TraditionalForm], 4, 
+          Automatic, {0.21048602747222228, 0.21048602747222228}], InsetBox[
+          FormBox[
+           GraphicsBox[
+            TagBox[
+             DynamicModuleBox[{Typeset`mesh = {MeshRegion, {}}}, 
+              
+              TagBox[GraphicsComplexBox[{{2.060410226387429, 
+                4.8526541529002625`}, {6.18, 7.0600000000000005`}, {
+                3.0500000000000003`, 2.54}, {5.64, 1.76}, {7.48, 4.16}, {3.7, 
+                7.0600000000000005`}}, 
+                {Hue[0.6, 0.3, 0.95], EdgeForm[Hue[0.6, 0.3, 0.75]], 
+                 
+                 TagBox[PolygonBox[{{3, 4, 1}, {5, 2, 6}, {1, 4, 5}, {1, 5, 
+                   6}}],
+                  Annotation[#, "Geometry"]& ]}],
+               MouseAppearanceTag["LinkHand"]],
+              AllowKernelInitialization->False],
+             "MeshGraphics",
+             AutoDelete->True,
+             Editable->False,
+             Selectable->False],
+            
+            DefaultBaseStyle->{
+             "MeshGraphics", FrontEnd`GraphicsHighlightColor -> 
+              Hue[0.1, 1, 0.7]}],
+           TraditionalForm], 5, 
+          Automatic, {0.21048602747222228, 0.21048602747222228}], InsetBox[
+          FormBox[
+           GraphicsBox[
+            TagBox[
+             DynamicModuleBox[{Typeset`mesh = {MeshRegion, {}}}, 
+              
+              TagBox[GraphicsComplexBox[{{2.060410226387429, 
+                4.8526541529002625`}, {6.18, 7.0600000000000005`}, {
+                3.0500000000000003`, 2.54}, {5.64, 1.76}, {7.48, 4.16}, {3.7, 
+                7.0600000000000005`}}, 
+                {Hue[0.6, 0.3, 0.95], EdgeForm[Hue[0.6, 0.3, 0.75]], 
+                 
+                 TagBox[PolygonBox[{{3, 5, 1}, {5, 2, 1}, {5, 3, 4}, {1, 2, 
+                   6}}],
+                  Annotation[#, "Geometry"]& ]}],
+               MouseAppearanceTag["LinkHand"]],
+              AllowKernelInitialization->False],
+             "MeshGraphics",
+             AutoDelete->True,
+             Editable->False,
+             Selectable->False],
+            
+            DefaultBaseStyle->{
+             "MeshGraphics", FrontEnd`GraphicsHighlightColor -> 
+              Hue[0.1, 1, 0.7]}],
+           TraditionalForm], 6, 
+          Automatic, {0.21048602747222228, 0.21048602747222228}], InsetBox[
+          FormBox[
+           GraphicsBox[
+            TagBox[
+             DynamicModuleBox[{Typeset`mesh = {MeshRegion, {}}}, 
+              
+              TagBox[GraphicsComplexBox[{{2.060410226387429, 
+                4.8526541529002625`}, {6.18, 7.0600000000000005`}, {
+                3.0500000000000003`, 2.54}, {5.64, 1.76}, {7.48, 4.16}, {3.7, 
+                7.0600000000000005`}}, 
+                {Hue[0.6, 0.3, 0.95], EdgeForm[Hue[0.6, 0.3, 0.75]], 
+                 
+                 TagBox[PolygonBox[{{3, 2, 1}, {2, 3, 5}, {5, 3, 4}, {1, 2, 
+                   6}}],
+                  Annotation[#, "Geometry"]& ]}],
+               MouseAppearanceTag["LinkHand"]],
+              AllowKernelInitialization->False],
+             "MeshGraphics",
+             AutoDelete->True,
+             Editable->False,
+             Selectable->False],
+            
+            DefaultBaseStyle->{
+             "MeshGraphics", FrontEnd`GraphicsHighlightColor -> 
+              Hue[0.1, 1, 0.7]}],
+           TraditionalForm], 7, 
+          Automatic, {0.21048602747222228, 0.21048602747222228}], InsetBox[
+          FormBox[
+           GraphicsBox[
+            TagBox[
+             DynamicModuleBox[{Typeset`mesh = {MeshRegion, {}}}, 
+              
+              TagBox[GraphicsComplexBox[{{2.060410226387429, 
+                4.8526541529002625`}, {6.18, 7.0600000000000005`}, {
+                3.0500000000000003`, 2.54}, {5.64, 1.76}, {7.48, 4.16}, {3.7, 
+                7.0600000000000005`}}, 
+                {Hue[0.6, 0.3, 0.95], EdgeForm[Hue[0.6, 0.3, 0.75]], 
+                 
+                 TagBox[PolygonBox[{{1, 3, 6}, {3, 4, 2}, {2, 4, 5}, {6, 3, 
+                   2}}],
+                  Annotation[#, "Geometry"]& ]}],
+               MouseAppearanceTag["LinkHand"]],
+              AllowKernelInitialization->False],
+             "MeshGraphics",
+             AutoDelete->True,
+             Editable->False,
+             Selectable->False],
+            
+            DefaultBaseStyle->{
+             "MeshGraphics", FrontEnd`GraphicsHighlightColor -> 
+              Hue[0.1, 1, 0.7]}],
+           TraditionalForm], 8, 
+          Automatic, {0.21048602747222228, 0.21048602747222228}], InsetBox[
+          FormBox[
+           GraphicsBox[
+            TagBox[
+             DynamicModuleBox[{Typeset`mesh = {MeshRegion, {}}}, 
+              
+              TagBox[GraphicsComplexBox[{{2.060410226387429, 
+                4.8526541529002625`}, {6.18, 7.0600000000000005`}, {
+                3.0500000000000003`, 2.54}, {5.64, 1.76}, {7.48, 4.16}, {3.7, 
+                7.0600000000000005`}}, 
+                {Hue[0.6, 0.3, 0.95], EdgeForm[Hue[0.6, 0.3, 0.75]], 
+                 
+                 TagBox[PolygonBox[{{3, 4, 1}, {5, 2, 6}, {1, 4, 6}, {5, 6, 
+                   4}}],
+                  Annotation[#, "Geometry"]& ]}],
+               MouseAppearanceTag["LinkHand"]],
+              AllowKernelInitialization->False],
+             "MeshGraphics",
+             AutoDelete->True,
+             Editable->False,
+             Selectable->False],
+            
+            DefaultBaseStyle->{
+             "MeshGraphics", FrontEnd`GraphicsHighlightColor -> 
+              Hue[0.1, 1, 0.7]}],
+           TraditionalForm], 9, 
+          Automatic, {0.21048602747222228, 0.21048602747222228}], InsetBox[
+          FormBox[
+           GraphicsBox[
+            TagBox[
+             DynamicModuleBox[{Typeset`mesh = {MeshRegion, {}}}, 
+              
+              TagBox[GraphicsComplexBox[{{2.060410226387429, 
+                4.8526541529002625`}, {6.18, 7.0600000000000005`}, {
+                3.0500000000000003`, 2.54}, {5.64, 1.76}, {7.48, 4.16}, {3.7, 
+                7.0600000000000005`}}, 
+                {Hue[0.6, 0.3, 0.95], EdgeForm[Hue[0.6, 0.3, 0.75]], 
+                 
+                 TagBox[PolygonBox[{{1, 3, 6}, {2, 4, 5}, {4, 6, 3}, {6, 4, 
+                   2}}],
+                  Annotation[#, "Geometry"]& ]}],
+               MouseAppearanceTag["LinkHand"]],
+              AllowKernelInitialization->False],
+             "MeshGraphics",
+             AutoDelete->True,
+             Editable->False,
+             Selectable->False],
+            
+            DefaultBaseStyle->{
+             "MeshGraphics", FrontEnd`GraphicsHighlightColor -> 
+              Hue[0.1, 1, 0.7]}],
+           TraditionalForm], 10, 
+          Automatic, {0.21048602747222228, 0.21048602747222228}], InsetBox[
+          FormBox[
+           GraphicsBox[
+            TagBox[
+             DynamicModuleBox[{Typeset`mesh = {MeshRegion, {}}}, 
+              
+              TagBox[GraphicsComplexBox[{{2.060410226387429, 
+                4.8526541529002625`}, {6.18, 7.0600000000000005`}, {
+                3.0500000000000003`, 2.54}, {5.64, 1.76}, {7.48, 4.16}, {3.7, 
+                7.0600000000000005`}}, 
+                {Hue[0.6, 0.3, 0.95], EdgeForm[Hue[0.6, 0.3, 0.75]], 
+                 
+                 TagBox[PolygonBox[{{3, 4, 1}, {5, 2, 1}, {1, 4, 5}, {1, 2, 
+                   6}}],
+                  Annotation[#, "Geometry"]& ]}],
+               MouseAppearanceTag["LinkHand"]],
+              AllowKernelInitialization->False],
+             "MeshGraphics",
+             AutoDelete->True,
+             Editable->False,
+             Selectable->False],
+            
+            DefaultBaseStyle->{
+             "MeshGraphics", FrontEnd`GraphicsHighlightColor -> 
+              Hue[0.1, 1, 0.7]}],
+           TraditionalForm], 11, 
+          Automatic, {0.21048602747222228, 0.21048602747222228}], InsetBox[
+          FormBox[
+           GraphicsBox[
+            TagBox[
+             DynamicModuleBox[{Typeset`mesh = {MeshRegion, {}}}, 
+              
+              TagBox[GraphicsComplexBox[{{2.060410226387429, 
+                4.8526541529002625`}, {6.18, 7.0600000000000005`}, {
+                3.0500000000000003`, 2.54}, {5.64, 1.76}, {7.48, 4.16}, {3.7, 
+                7.0600000000000005`}}, 
+                {Hue[0.6, 0.3, 0.95], EdgeForm[Hue[0.6, 0.3, 0.75]], 
+                 
+                 TagBox[PolygonBox[{{3, 2, 1}, {3, 4, 2}, {2, 4, 5}, {1, 2, 
+                   6}}],
+                  Annotation[#, "Geometry"]& ]}],
+               MouseAppearanceTag["LinkHand"]],
+              AllowKernelInitialization->False],
+             "MeshGraphics",
+             AutoDelete->True,
+             Editable->False,
+             Selectable->False],
+            
+            DefaultBaseStyle->{
+             "MeshGraphics", FrontEnd`GraphicsHighlightColor -> 
+              Hue[0.1, 1, 0.7]}],
+           TraditionalForm], 12, 
+          Automatic, {0.21048602747222228, 0.21048602747222228}], InsetBox[
+          FormBox[
+           GraphicsBox[
+            TagBox[
+             DynamicModuleBox[{Typeset`mesh = {MeshRegion, {}}}, 
+              
+              TagBox[GraphicsComplexBox[{{2.060410226387429, 
+                4.8526541529002625`}, {6.18, 7.0600000000000005`}, {
+                3.0500000000000003`, 2.54}, {5.64, 1.76}, {7.48, 4.16}, {3.7, 
+                7.0600000000000005`}}, 
+                {Hue[0.6, 0.3, 0.95], EdgeForm[Hue[0.6, 0.3, 0.75]], 
+                 
+                 TagBox[PolygonBox[{{3, 4, 1}, {2, 4, 5}, {1, 4, 6}, {6, 4, 
+                   2}}],
+                  Annotation[#, "Geometry"]& ]}],
+               MouseAppearanceTag["LinkHand"]],
+              AllowKernelInitialization->False],
+             "MeshGraphics",
+             AutoDelete->True,
+             Editable->False,
+             Selectable->False],
+            
+            DefaultBaseStyle->{
+             "MeshGraphics", FrontEnd`GraphicsHighlightColor -> 
+              Hue[0.1, 1, 0.7]}],
+           TraditionalForm], 13, 
+          Automatic, {0.21048602747222228, 0.21048602747222228}], InsetBox[
+          FormBox[
+           GraphicsBox[
+            TagBox[
+             DynamicModuleBox[{Typeset`mesh = {MeshRegion, {}}}, 
+              
+              TagBox[GraphicsComplexBox[{{2.060410226387429, 
+                4.8526541529002625`}, {6.18, 7.0600000000000005`}, {
+                3.0500000000000003`, 2.54}, {5.64, 1.76}, {7.48, 4.16}, {3.7, 
+                7.0600000000000005`}}, 
+                {Hue[0.6, 0.3, 0.95], EdgeForm[Hue[0.6, 0.3, 0.75]], 
+                 
+                 TagBox[PolygonBox[{{3, 4, 1}, {1, 4, 2}, {2, 4, 5}, {1, 2, 
+                   6}}],
+                  Annotation[#, "Geometry"]& ]}],
+               MouseAppearanceTag["LinkHand"]],
+              AllowKernelInitialization->False],
+             "MeshGraphics",
+             AutoDelete->True,
+             Editable->False,
+             Selectable->False],
+            
+            DefaultBaseStyle->{
+             "MeshGraphics", FrontEnd`GraphicsHighlightColor -> 
+              Hue[0.1, 1, 0.7]}],
+           TraditionalForm], 14, 
+          Automatic, {0.21048602747222228, 0.21048602747222228}]}}]],
+     MouseAppearanceTag["NetworkGraphics"]],
+    AllowKernelInitialization->False]],
+  DefaultBaseStyle->"NetworkGraphics",
+  FormatType->TraditionalForm,
+  FrameTicks->None,
+  ImageSize->Large]], "Output",
+ CellChangeTimes->{{3.9509183854853096`*^9, 3.9509184471530495`*^9}, {
+  3.950918498599106*^9, 3.9509185134243145`*^9}, {3.9509185733702564`*^9, 
+  3.9509185842848663`*^9}},
+ CellLabel->
+  "Out[148]=",ExpressionUUID->"d9d055b1-c493-604c-adca-99ece99f4df7"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"pts", "=", 
+   RowBox[{"RandomReal", "[", 
+    RowBox[{"10", ",", 
+     RowBox[{"{", 
+      RowBox[{"10", ",", "2"}], "}"}]}], "]"}]}], ";"}], "\n", 
+ RowBox[{"LocatorPane", "[", 
+  RowBox[{
+   RowBox[{"Dynamic", "[", "pts", "]"}], ",", 
+   RowBox[{"Graphics", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"Blue", ",", 
+       RowBox[{"PointSize", "[", "0.03", "]"}], ",", 
+       RowBox[{"Point", "[", 
+        RowBox[{"Dynamic", "[", "pts", "]"}], "]"}]}], "}"}], ",", 
+     RowBox[{"Frame", "->", "True"}], ",", 
+     RowBox[{"PlotRange", "->", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{"0", ",", "10"}], "}"}], ",", 
+        RowBox[{"{", 
+         RowBox[{"0", ",", "10"}], "}"}]}], "}"}]}]}], "]"}], ",", 
+   RowBox[{"Appearance", "->", "None"}], ",", 
+   RowBox[{"LocatorAutoCreate", "->", "True"}]}], "]"}]}], "Input",
+ CellChangeTimes->{{3.948545949080797*^9, 3.94854595687961*^9}, {
+  3.9509182408806725`*^9, 3.950918241403059*^9}, {3.9509183397697353`*^9, 
+  3.9509183400647354`*^9}, {3.950918413426815*^9, 3.9509184135703735`*^9}, {
+  3.950918495228491*^9, 3.950918495528803*^9}, {3.9509611005751762`*^9, 
+  3.9509611010681305`*^9}},
+ CellLabel->"In[9]:=",ExpressionUUID->"dd47bdaa-6347-7841-bb1e-36afa808264b"],
+
+Cell[BoxData[
+ LocatorPaneBox[Dynamic[$CellContext`pts], 
+  GraphicsBox[
+   {RGBColor[0, 0, 1], PointSize[0.03], PointBox[Dynamic[$CellContext`pts]]},
+   Frame->True,
+   PlotRange->{{0, 10}, {0, 10}}],
+  Appearance->None,
+  LocatorAutoCreate->True]], "Output",
+ CellChangeTimes->{
+  3.9485459612303486`*^9, {3.948546264907524*^9, 3.9485462700414524`*^9}, 
+   3.9485463242188377`*^9, 3.948548107020298*^9, 3.9485541094095364`*^9, 
+   3.9489063324404793`*^9, 3.9507964372316837`*^9, 3.950796470160095*^9, {
+   3.950883531393284*^9, 3.950883540232073*^9}, 3.9508839647684746`*^9, 
+   3.950918105207554*^9, 3.950918242431452*^9, 3.9509183410605507`*^9, {
+   3.950918395360058*^9, 3.9509184183548317`*^9}, {3.9509184963962307`*^9, 
+   3.9509185011732597`*^9}, {3.9509611022968807`*^9, 3.9509611131706257`*^9}},
+ CellLabel->"Out[10]=",ExpressionUUID->"4eadc656-ab89-d449-80be-e79b37c5fce9"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Length", "[", "triangulations", "]"}]], "Input",
+ CellChangeTimes->{{3.9489065627394047`*^9, 3.9489065659621735`*^9}},
+ CellLabel->"In[46]:=",ExpressionUUID->"ff9d03e8-97bf-5546-ba4b-48d120416d87"],
+
+Cell[BoxData["80"], "Output",
+ CellChangeTimes->{3.948906566670103*^9},
+ CellLabel->"Out[46]=",ExpressionUUID->"ee5e5889-456f-e440-8013-47b43f60e703"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["pts"], "Input",
+ CellChangeTimes->{{3.9507964408650703`*^9, 3.950796441086609*^9}},
+ CellLabel->"In[11]:=",ExpressionUUID->"0e4b8ff9-780e-884c-867f-4efaad9eb841"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"6.184317625542285`", ",", "3.8194006742479694`"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"0.7042417101125675`", ",", "1.2264238182553289`"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"7.3098091300932175`", ",", "2.1151102212906636`"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"3.993670085551212`", ",", "7.175376854414871`"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"2.2780088892560144`", ",", "7.290758196123722`"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"7.886785385720472`", ",", "6.7252003946551895`"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"9.653900241025354`", ",", "5.970776589043044`"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"3.6076616628907345`", ",", "3.649458761081732`"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"6.479768361167878`", ",", "1.619677668315525`"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"3.396683183682148`", ",", "3.8494706495578903`"}], "}"}]}], 
+  "}"}]], "Output",
+ CellChangeTimes->{3.950796441320671*^9, 3.950796511531948*^9, 
+  3.9509611213050747`*^9},
+ CellLabel->"Out[11]=",ExpressionUUID->"4e18bd92-ff80-9e4c-8c00-e2240c14c7a8"]
+}, Open  ]]
+},
+WindowSize->{1152, 651.6},
+WindowMargins->{{
+  Automatic, -5.399999999999864}, {-5.399999999999977, Automatic}},
+FrontEndVersion->"14.2 for Microsoft Windows (64-bit) (December 26, 2024)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"08f78ef8-8124-1c41-a260-5304754eb5e3"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[576, 22, 20722, 434, 1759, "Input",ExpressionUUID->"faf433c9-dc3a-8444-a2e7-ba24b2a31b3f"],
+Cell[21301, 458, 29314, 583, 541, "Output",ExpressionUUID->"d9d055b1-c493-604c-adca-99ece99f4df7"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[50652, 1046, 1299, 32, 66, "Input",ExpressionUUID->"dd47bdaa-6347-7841-bb1e-36afa808264b"],
+Cell[51954, 1080, 884, 16, 383, "Output",ExpressionUUID->"4eadc656-ab89-d449-80be-e79b37c5fce9"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[52875, 1101, 221, 3, 28, "Input",ExpressionUUID->"ff9d03e8-97bf-5546-ba4b-48d120416d87"],
+Cell[53099, 1106, 150, 2, 32, "Output",ExpressionUUID->"ee5e5889-456f-e440-8013-47b43f60e703"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[53286, 1113, 176, 2, 28, "Input",ExpressionUUID->"0e4b8ff9-780e-884c-867f-4efaad9eb841"],
+Cell[53465, 1117, 1165, 26, 51, "Output",ExpressionUUID->"4e18bd92-ff80-9e4c-8c00-e2240c14c7a8"]
+}, Open  ]]
+}
+]
+*)
+
